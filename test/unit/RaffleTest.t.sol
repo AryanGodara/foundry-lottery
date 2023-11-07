@@ -222,7 +222,7 @@ contract RaffleTest is Test {
 
     function testFulFillRandomWordsCanOnnlyBeCalledAfterPerformUpkeep(
         uint256 randomRequestId //* Fuzz Test
-    ) public raffleEnteredAndTimePassed {
+    ) public raffleEnteredAndTimePassed skipFork {
         // Arrange
         //* Done inside the modifier
 
