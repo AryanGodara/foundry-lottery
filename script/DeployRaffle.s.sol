@@ -9,16 +9,18 @@ import {CreateSubscription, FundSubscription, AddConsumer} from "./Interactions.
 contract DeployRaffle is Script {
     function run() external returns (Raffle, HelperConfig) {
         HelperConfig helperConfig = new HelperConfig();
-        
-        (uint256 entranceFee,
-         uint256 interval,
-         address vrfCoordinator,
-         bytes32 gasLane,
-         uint64 subscriptionId,
-         uint32 callbackGasLimit,
-         address link) = helperConfig.activeNetworkConfig(); // Returns a struct -> All fields in form of a tuple here :3
 
-        if ( subscriptionId == 0 ) {
+        (
+            uint256 entranceFee,
+            uint256 interval,
+            address vrfCoordinator,
+            bytes32 gasLane,
+            uint64 subscriptionId,
+            uint32 callbackGasLimit,
+            address link
+        ) = helperConfig.activeNetworkConfig(); // Returns a struct -> All fields in form of a tuple here :3
+
+        if (subscriptionId == 0) {
             // Create subscription
             CreateSubscription createSubscription = new CreateSubscription();
             subscriptionId = createSubscription.createSubscription(vrfCoordinator);
