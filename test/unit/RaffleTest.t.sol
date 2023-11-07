@@ -41,9 +41,9 @@ contract RaffleTest is Test{
         assert(raffle.getRaffleState() == Raffle.RaffleState.OPEN);
     }
     
-    //////////////////////////
-    // Test enterRaffle()  ////
-    //////////////////////////
+    //* ////////////////////////
+    //*  Test enterRaffle()  ////
+    //* ////////////////////////
     function testRaffleRevertsWhenYouDontPayEnough() public {
         // Arrange
         vm.prank(PLAYER);
@@ -78,6 +78,64 @@ contract RaffleTest is Test{
         vm.expectRevert(Raffle.Raffle__RaffleNotOpen.selector);
         vm.prank(PLAYER);
         raffle.enterRaffle{value: entranceFee}();
+    }
+
+    //* ////////////////////////
+    //*  Test checkUpkeep()  ///
+    //* ////////////////////////
+    function testCheckUpKeepReturnsFalseIfItHasNoBalance() public {
+        // Arrange
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
+
+        // Act
+        (bool upKeepNeeded, ) = raffle.checkUpkeep("");
+
+        // Assert
+        assert(!upKeepNeeded);
+    }
+
+    function testCheckUpKeepReturnsFalseIfRaffleNotOpen() public {
+        // Arrange
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1);
+        raffle.performUpkeep(""); // Sets RaffleState enum to the "Calculating" state
+
+        // Act
+        (bool upKeepNeeded, ) = raffle.checkUpkeep(""); // Should return false now
+
+        // Assert
+        assert(!upKeepNeeded);
+    }
+
+    function testCheckUpKeepReturnsFalseIfEnoughTimeHasntPassed() public {
+        // Arrange
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        vm.warp(block.timestamp + interval - 1); // Warp to the end of the raffle (vm.warp() sets the block.timestamp)
+        vm.roll(block.number + 1); // Roll the block number forward
+
+        // Act
+        (bool upKeepNeeded, ) = raffle.checkUpkeep(""); // Should return false now
+
+        // Assert
+        assert(!upKeepNeeded);
+    }
+
+    function testCheckUpKeepReturnsTrueIfEnoughTimeHasPassed() public {
+        // Arrange
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        vm.warp(block.timestamp + interval + 1); // Warp to the end of the raffle (vm.warp() sets the block.timestamp)
+        vm.roll(block.number + 1); // Roll the block number forward
+
+        // Act
+        (bool upKeepNeeded, ) = raffle.checkUpkeep(""); // Should return false now
+
+        // Assert
+        assert(upKeepNeeded);
     }
 }
  
