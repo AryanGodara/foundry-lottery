@@ -32,7 +32,7 @@ contract RaffleTest is Test{
           vrfCoordinator,
           gasLane,
           subscriptionId,
-          callbackGasLimit) = helperConfig.activeNetworkConfig();
+          callbackGasLimit,) = helperConfig.activeNetworkConfig();
         
         vm.deal(PLAYER, STARTING_USER_BALANCE); // Give the player some money
     }

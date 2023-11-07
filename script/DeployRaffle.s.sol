@@ -15,7 +15,7 @@ contract DeployRaffle is Script {
          address vrfCoordinator,
          bytes32 gasLane,
          uint64 subscriptionId,
-         uint32 callbackGasLimit) = helperConfig.activeNetworkConfig(); // Returns a struct -> All fields in form of a tuple here :3
+         uint32 callbackGasLimit,) = helperConfig.activeNetworkConfig(); // Returns a struct -> All fields in form of a tuple here :3
 
         if ( subscriptionId == 0 ) {
             // Create subscription
