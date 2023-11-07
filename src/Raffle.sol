@@ -41,6 +41,7 @@ contract Raffle is VRFConsumerBaseV2 {
     // ** Events
     event EnteredRaffle(address indexed player);
     event WinnerPicked(address indexed winner);
+    event RequestedRaffleWinner(uint256 indexed requestId);
 
     constructor(
         uint256 entranceFee,
@@ -108,14 +109,15 @@ contract Raffle is VRFConsumerBaseV2 {
         }
         s_raffleState = RaffleState.CALCULATING; // Set the state to calculating
 
-        // uint256 requestId = i_vrfCoordinator.requestRandomWords( //* This variable is not in use rn, so ignore it
-        i_vrfCoordinator.requestRandomWords(
+        uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,                    // gas lane
             i_subscriptionId,           // Id we funded with link in order to make these requests
             REQUEST_CONFIRMATIONS,        // No of block confirmations for your random number to be considered good
             i_callbackGasLimit,           // Make sure that we don't overspend on this call
             NUM_WORDS                    // No of random numbers
         );
+
+        emit RequestedRaffleWinner(requestId);
     }
 
     function fulfillRandomWords( // This function is called by the VRF Coordinator (Chainlink), we need to override it
