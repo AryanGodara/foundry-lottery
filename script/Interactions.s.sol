@@ -61,7 +61,7 @@ contract FundSubscription is Script {
     }
 }
 
-contract AddConsume is Script {
+contract AddConsumer is Script {
     function addConsumer(address raffle, address vrfCoordinator, uint64 subId) public {
         console.log("Adding consumer contract to raffle: ", raffle);
         console.log("Using vrfCoordinator: ", vrfCoordinator);
