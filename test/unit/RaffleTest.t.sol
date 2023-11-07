@@ -213,6 +213,13 @@ contract RaffleTest is Test {
     //*  Test fulfillRandomWords()  ///
     //* //////////////////////////////
 
+    modifier skipFork() {
+        if (block.chainid != 3133) {
+            return;
+        } 
+        _;
+    }
+
     function testFulFillRandomWordsCanOnnlyBeCalledAfterPerformUpkeep(
         uint256 randomRequestId //* Fuzz Test
     ) public raffleEnteredAndTimePassed {
@@ -224,7 +231,11 @@ contract RaffleTest is Test {
         VRFCoordinatorV2Mock(vrfCoordinator).fulfillRandomWords(randomRequestId, address(raffle));
     }
 
-    function testFulfillRandomWordsPicksAWinnerResetsAndSendsMoney() public raffleEnteredAndTimePassed {
+    function testFulfillRandomWordsPicksAWinnerResetsAndSendsMoney()
+        public
+        raffleEnteredAndTimePassed
+        skipFork
+    {
         // Arrange
         uint256 additionalEntrants = 5;
         uint256 startingIndex = 1;
