@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {DeployRaffle} from "../../script/DeployRaffle.s.sol";
 import {Raffle} from "../../src/Raffle.sol";
-import {Test, console} from "forge-std/Test.sol";
+import {DeployRaffle} from "../../script/DeployRaffle.s.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
+import {Test, console} from "forge-std/Test.sol";
+import {Vm} from "forge-std/Vm.sol";
 
 contract RaffleTest is Test{
     // Events
@@ -165,5 +166,42 @@ contract RaffleTest is Test{
         );
         raffle.performUpkeep(""); // Should work
     }
+
+    modifier raffleEnteredAndTimePassed {
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        vm.warp(block.timestamp + interval + 1); // Warp to the end of the raffle (vm.warp() sets the block.timestamp)
+        vm.roll(block.number + 1); // Roll the block number forward, (vm.roll() sets the block.number)
+        _;
+    }
+
+    function testPerformUpkeepUpdatesRaffleStateAndEmitsRequestId() 
+        public
+        raffleEnteredAndTimePassed
+    {
+        // Arrange
+        //* Done inside the modifier
+        
+        // Act
+        vm.recordLogs(); // Automatically saves all the emitted logs inside a data structure
+        raffle.performUpkeep("");   // Emits the requestId
+        
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        bytes32 requestId = entries[1].topics[1];
+        // all log entries are stored in bytes32 (older string lol) type format
+        // entries[0] is the event emitted by VRFCoordiantorV2Mock, so our custom event is the second one
+        // The first topic is generic (kind of like the first command line argument), so we get ours in the second number in the array
+        // The requestId is the second topic in our event, so we get it from the second number in the array
+        
+        Raffle.RaffleState rState = raffle.getRaffleState();
+        // Assert
+        assert(rState == Raffle.RaffleState.CALCULATING);
+        assert(uint256(rState) == 1);
+        assert(uint256(requestId)>0); // Make sure the requestId was actually generated
+    }
+
+    //* //////////////////////////////
+    //*  Test fullfillRandomWords() ///
+    //* //////////////////////////////
 }
  
